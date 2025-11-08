@@ -10,4 +10,3 @@ CILIUM_CLI_VERSION: "v0.18.8"
 CLI_ARCH: "amd64"
 API_SERVER_IP: "{{ ansible_default_ipv4.address }}"  # You can change this if you have an external load balancer for kube-apiserver endpoint
 API_SERVER_PORT: 6443
-POD_CIDR: "10.42.0.0/16"
