@@ -1,0 +1,36 @@
+- name: Install required packages for longhorn
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Install required packages for longhorn
+      ansible.builtin.apt:
+        name:
+          - open-iscsi
+          - nfs-common
+          - cryptsetup
+          - dmsetup
+        state: present
+        update_cache: true
+
+    - name: Starting and enabling iscsid service
+      ansible.builtin.systemd_service:
+        name: iscsid
+        state: started
+        enabled: true
+
+
+- name: Load required kernel modules for longhorn
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Load required kernel modules for longhorn
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+        persistent: present
+      loop:
+        - iscsi_tcp
+        - dm_crypt
+        - nfs

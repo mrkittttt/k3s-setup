@@ -1,0 +1,13 @@
+### K3S VARIABLES ###
+K3S_VERSION: "v1.33.4+k3s1"
+K3S_TOKEN: "2ea67eddf9a06cbf330a787a8f7c7641"
+cluster_cidr: 10.42.0.0/16
+tls_san: kubernetes.example.com  # Either IP or DNS, can be used for for kube-apiserver load balancing
+initial_master_ip: "{{ hostvars[groups['initial_k3s_server'][0]].inventory_hostname }}"  # Do not change this
+
+### CILIUM CNI VARIABLES ###
+CILIUM_CLI_VERSION: "v0.18.8"
+CLI_ARCH: "amd64"
+API_SERVER_IP: "{{ ansible_default_ipv4.address }}"  # You can change this if you have an external load balancer for kube-apiserver endpoint
+API_SERVER_PORT: 6443
+POD_CIDR: "10.42.0.0/16"

@@ -1,0 +1,33 @@
+- name: Install Cilium CNI plugin for kubernetes
+  hosts: initial_k3s_server
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Download Cilium CLI tarball
+      ansible.builtin.get_url:
+        url: "https://github.com/cilium/cilium-cli/releases/download/{{ CILIUM_CLI_VERSION }}/cilium-linux-{{ CLI_ARCH }}.tar.gz"
+        dest: "/tmp/cilium-linux-{{ CLI_ARCH }}.tar.gz"
+        mode: '0644'
+
+    - name: Extract Cilium CLI binary
+      ansible.builtin.unarchive:
+        src: "/tmp/cilium-linux-{{ CLI_ARCH }}.tar.gz"
+        dest: /usr/local/bin/
+        remote_src: true
+
+    - name: Make Cilium binary executable
+      ansible.builtin.file:
+        path: /usr/local/bin/cilium
+        mode: '0755'
+
+    - name: Install Cilium
+      ansible.builtin.shell: |
+        cilium install \
+        --set k8sServiceHost={{ API_SERVER_IP }} \
+        --set k8sServicePort={{ API_SERVER_PORT }} \
+        --set ipam.operator.clusterPoolIPv4PodCIDRList={{ POD_CIDR }} \
+        --set kubeProxyReplacement=true \
+        --helm-set=operator.replicas=1 && \
+        touch /var/tmp/cilium_installed 
+      args:
+        creates: /var/tmp/cilium_installed

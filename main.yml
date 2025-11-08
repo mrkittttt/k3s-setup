@@ -1,0 +1,22 @@
+# Host tuning before installation of components
+# Set the sysctl value according to your environment
+- import_playbook: playbooks/preconfigure-basic.yml
+
+# Preconfiguration before longhorn installation
+# This includes kernel modules and systemd units
+# Comment the line below if you are not going to install longhorn CSI
+- import_playbook: playbooks/preconfigure-longhorn.yml
+
+# This playbook is used to initialize k3s cluster and join server/agent nodes to make up a multi-node cluster
+# Make sure and have a proper inventory file set up
+# !NOTE There must be only a single host in [initial_k3s_server] group in inventory file
+# !NOTE Do NOT duplicate the [initial_k3s_server] host also in [k3s_servers] group
+- import_playbook: playbooks/setup-cluster.yml
+
+# For convenience purposes only
+# Copies the /etc/rancher/k3s/k3s.yaml to root directory and sets up an alias for kubectl command
+- import_playbook: playbooks/setup-kubeconfig.yml
+
+# The playbooks/setup-cluster.yml disables the usage of default CNI for k3s, which is flannel
+# This playbook sets up cilium CNI which is more handy in production environments compared to flannel
+- import_playbook: playbooks/install-cilium.yml

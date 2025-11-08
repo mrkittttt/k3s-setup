@@ -1,0 +1,58 @@
+- name: Setup k3s cluster
+  become: true
+  hosts: initial_k3s_server
+  gather_facts: false
+  tasks:
+    - name: Init k3s cluster
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ K3S_VERSION }} K3S_TOKEN={{ K3S_TOKEN }} sh -s - server \
+        --disable-kube-proxy \
+        --disable local-storage \
+        --flannel-backend=none \
+        --disable-network-policy \
+        --cluster-init \
+        --tls-san={{ tls_san }} \
+        --cluster-cidr={{ cluster_cidr }} && \
+        touch /var/tmp/cluster_initialized
+      args:
+        creates: /var/tmp/cluster_initialized
+      tags: init_k3s
+
+
+- name: Join server nodes
+  hosts: k3s_servers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Join server nodes
+      become: true
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ K3S_VERSION }} K3S_TOKEN={{ K3S_TOKEN }} sh -s - server \
+        --server https://{{ initial_master_ip }}:6443 \
+        --disable-kube-proxy \
+        --disable local-storage \
+        --flannel-backend=none \
+        --disable-network-policy \
+        --cluster-init \
+        --tls-san={{ tls_san }} \
+        --cluster-cidr={{ cluster_cidr }} && \
+        touch /var/tmp/server_joined
+      args:
+        creates: /var/tmp/server_joined
+      tags: join_server_nodes
+
+
+- name: Join agent nodes
+  hosts: k3s_agents
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Join agent nodes
+      become: true
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ K3S_VERSION }} K3S_TOKEN={{ K3S_TOKEN }} sh -s - agent \
+        --server https://{{ initial_master_ip }}:6443 && \
+        touch /var/tmp/agent_joined
+      args:
+        creates: /var/tmp/agent_joined
+      tags: join_agent_nodes
