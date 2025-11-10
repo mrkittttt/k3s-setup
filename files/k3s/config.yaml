@@ -1,0 +1,18 @@
+token: "{{ K3S_TOKEN }}"
+disable:
+  - kube-proxy
+  - local-storage
+disable-network-policy: true
+flannel-backend: "none"
+tls-san:
+  - "192.168.122.30"
+  - "kubernetes.local"
+cluster-cidr: "{{ cluster_cidr }}"
+
+{# If the host is initial master, then cluster-init #}
+{# If not, connect to an existing cluster #}
+{% if inventory_hostname in groups['initial_k3s_server'] -%}
+cluster-init: true
+{% else -%}
+server: "https://{{ initial_master_ip }}:6443"
+{% endif %}
