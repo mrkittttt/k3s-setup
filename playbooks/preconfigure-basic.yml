@@ -62,15 +62,18 @@
   gather_facts: false
   tags: copy
   tasks:
-    - name: Create /var/lib/rancher/k3s/agent/images
+    - name: Create system directories
       ansible.builtin.file:
-        path: /var/lib/rancher/k3s/agent/images
+        path: '{{ item }}'
         state: directory
         mode: '0755'
         owner: root
         group: root
+      loop:
+        - /var/lib/rancher/k3s/agent/images
+        - /etc/rancher/k3s
 
-    - name: Create /var/lib/rancher/k3s/agent/images/.cache.json
+    - name: Create cache.json
       ansible.builtin.file:
         path: /var/lib/rancher/k3s/agent/images/.cache.json
         state: touch
@@ -102,3 +105,11 @@
         owner: root
         group: root
         mode: '0755'
+
+    - name: Copy config.yaml
+      ansible.builtin.template:
+        src: ../files/k3s/config.yaml
+        dest: "/etc/rancher/k3s/config.yaml"
+        owner: root
+        group: root
+        mode: '0644'
