@@ -10,7 +10,11 @@
       fs.inotify.max_user_instances: 2097102
       fs.inotify.max_queued_events: 2097102
       kernel.pid_max: 4194304  # Default value
-      #net.netfilter.nf_conntrack_max: 131072  # Default value
+      fs.file-max: 9223372036854775807
+      vm.max_map_count: 1048576
+      vm.max_map_count: 2097152
+      net.core.wmem_max: 16777216
+      net.netfilter.nf_conntrack_max: 131072  # Default value
   tasks:
    - name: Change sysctl configs
      ansible.posix.sysctl:
@@ -53,3 +57,5 @@
       ansible.builtin.fail:
         msg: "/var is not on a separate LVM logical volume. Configure LVM for /var before proceeding."
       when: var_mount.stdout is not match("^/dev/mapper/") and var_mount.stdout is not match("^/dev/[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+")
+
+- name: 
